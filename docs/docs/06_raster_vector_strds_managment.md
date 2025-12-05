@@ -71,18 +71,125 @@ mapset_name = "test_mapset"
 # mapset creation
 locations["nc_spm_08"].create_mapset(mapset_name)
 
-# upload tif
+# Upload GeoJSON
 vector_layer_name = "test"
 file = "/home/testuser/data/firestations.geojson"
 locations["nc_spm_08"].mapsets[mapset_name].upload_vector(vector_layer_name, file)
 print(locations["nc_spm_08"].mapsets[mapset_name].vector_layers.keys())
 ```
 
-Delete a raster layer
+Delete a vector layer
 ```
 locations["nc_spm_08"].mapsets[mapset_name].delete_vector(vector_layer_name)
 print(locations["nc_spm_08"].mapsets[mapset_name].vector_layers.keys())
 
 # delete mapset
 locations["nc_spm_08"].delete_mapset(mapset_name)
+```
+
+## Space-Time-Raster-Dataset (STRDS) management
+
+Create a new, empty STRDS and register raster maps
+(here the user mapset will be created before)
+
+```
+strds_name = "test_strds"
+
+# Create mapset
+mapset_name = "test_strds_mapset"
+locations["ECAD"].create_mapset(mapset_name)
+
+# Create new STRDS
+locations["ECAD"]
+    .mapsets[mapset_name]
+    .create_strds(
+        strds_name,
+        "Title of the STRDS",
+        "Longer description description of the STRDS",
+        "absolute",  # temporal type of the STRDS
+    )
+
+# Register raster maps in STRDS
+locations["ECAD"]
+    .mapsets[mapset_name]
+    strds[strds_name].register_raster_layers(
+        [
+            {
+                "name": "precipitation_yearly_mm_0@PERMANENT",
+                "start_time": "1951-01-01 00:00:00",
+                "end_time": "1952-01-01 00:00:00",
+            },
+            {
+                "name": "precipitation_yearly_mm_1@PERMANENT",
+                "start_time": "1952-01-01 00:00:00",
+                "end_time": "1953-01-01 00:00:00",
+            },
+            {
+                "name": "precipitation_yearly_mm_2@PERMANENT",
+                "start_time": "1953-01-01 00:00:00",
+                "end_time": "1954-01-01 00:00:00",
+            },
+        ],
+    )
+```
+
+Get STRDS metadata and list raster maps
+
+```
+# Get general info
+locations["ECAD"]
+    .mapsets[mapset_name]
+    strds[strds_name].get_info()
+
+# Get selected, registered raster maps
+locations["ECAD"]
+    .mapsets[mapset_name]
+    strds[strds_name].get_strds_raster_layers(
+        where="start_time >= '1952-01-01 00:00:00'"
+    )
+```
+
+Sample STRDS at point locations
+
+```
+locations["ECAD"]
+    .mapsets[mapset_name]
+    strds[strds_name].sample_strds(
+        [["id", ,y], ["id",x,y]]
+    )
+```
+
+Compute univariate statistics for areas over an STRDS
+
+```
+locations["ECAD"]
+    .mapsets[mapset_name]
+    strds[strds_name].compute_strds_statistics(
+
+    )
+```
+
+Render STRDS
+
+```
+locations["ECAD"]
+    .mapsets[mapset_name]
+    strds[strds_name].render(
+        {
+            "n": ,
+            "s": ,
+            "e": ,
+            "w": ,
+            "width": 800,
+            "height": 600,
+            "start_time": "1952-01-01 00:00:00",
+            "end_time": "1954-01-01 00:00:00",
+        }
+    )
+```
+
+
+
+```
+# https://actinia.mundialis.de/latest/locations/ECAD/mapsets/PERMANENT/strds/precipitation_1950_2013_yearly_mm
 ```
